@@ -2063,7 +2063,6 @@ validator.validate(source);
 ]]>
         </Details>
     </BugPattern>
-    <BugCode abbrev="SECXXEVAL">XXE Vulnerability using an XML Validator</BugCode>
 
     <!-- XPath Injection for Javax -->
     <Detector class="com.h3xstream.findsecbugs.xpath.XPathInjectionDetector">

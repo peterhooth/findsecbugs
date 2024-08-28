@@ -36,16 +36,12 @@ public class CookieReadDetector extends OpcodeStackDetector {
     @Override
     public void sawOpcode(int seen) {
 
-        if (seen == Const.INVOKEVIRTUAL && isCookieClass()
+        if (seen == Const.INVOKEVIRTUAL && getClassConstantOperand().equals("javax/servlet/http/Cookie")
                 && (getNameConstantOperand().equals("getName") || getNameConstantOperand().equals("getValue") ||
                 getNameConstantOperand().equals("getPath"))) {
 
             bugReporter.reportBug(new BugInstance(this, COOKIE_USAGE_TYPE, Priorities.LOW_PRIORITY) //
                     .addClass(this).addMethod(this).addSourceLine(this));
         }
-    }
-
-    private boolean isCookieClass() {
-        return getClassConstantOperand().equals("javax/servlet/http/Cookie") || getClassConstantOperand().equals("jakarta/servlet/http/Cookie");
     }
 }

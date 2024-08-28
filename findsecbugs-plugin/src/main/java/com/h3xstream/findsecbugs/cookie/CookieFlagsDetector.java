@@ -78,7 +78,8 @@ public class CookieFlagsDetector implements Detector {
             Instruction inst = loc.getHandle().getInstruction();
             if(inst instanceof INVOKESPECIAL) {
                 INVOKESPECIAL invoke = (INVOKESPECIAL) inst;
-                if (isCookieClass(invoke, cpg) && "<init>".equals(invoke.getMethodName(cpg))) {
+                if ("javax.servlet.http.Cookie".equals(invoke.getClassName(cpg)) &&
+                        "<init>".equals(invoke.getMethodName(cpg))) {
 
                     // The following call should push the cookie onto the stack
                     Instruction cookieStoreInstruction = loc.getHandle().getNext().getInstruction();
@@ -87,7 +88,8 @@ public class CookieFlagsDetector implements Detector {
                         // We will use the position of the object on the stack to track the cookie
                         ASTORE storeInstruction = (ASTORE)cookieStoreInstruction;
 
-                        if (!isSecureFlagSet(cpg, loc, storeInstruction.getIndex())) {
+                        Location setSecureLocation = getSetSecureLocation(cpg, loc, storeInstruction.getIndex());
+                        if (setSecureLocation == null) {
 
                             JavaClass javaClass = classContext.getJavaClass();
 
@@ -97,7 +99,8 @@ public class CookieFlagsDetector implements Detector {
                                     .addSourceLine(classContext, m, loc));
                         }
 
-                        if (!isHttpOnlyFlagSet(cpg, loc, storeInstruction.getIndex())) {
+                        Location setHttpOnlyLocation = getSetHttpOnlyLocation(cpg, loc, storeInstruction.getIndex());
+                        if (setHttpOnlyLocation == null) {
 
                             JavaClass javaClass = classContext.getJavaClass();
 
@@ -110,10 +113,6 @@ public class CookieFlagsDetector implements Detector {
                 }
             }
         }
-    }
-
-    private boolean isCookieClass(INVOKESPECIAL invoke, ConstantPoolGen cpg) {
-        return "javax.servlet.http.Cookie".equals(invoke.getClassName(cpg)) || "jakarta.servlet.http.Cookie".equals(invoke.getClassName(cpg));
     }
 
     /**
@@ -170,16 +169,12 @@ public class CookieFlagsDetector implements Detector {
         return null;
     }
 
-    private boolean isSecureFlagSet(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
-        Location javaxSetSecureLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setSecure");
-        Location jakartaSetSecureLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "jakarta.servlet.http.Cookie.setSecure");
-        return javaxSetSecureLocation != null || jakartaSetSecureLocation != null;
+    private Location getSetSecureLocation(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
+        return getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setSecure");
     }
 
-    private boolean isHttpOnlyFlagSet(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
-        Location javaxSetHttpOnlyLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setHttpOnly");
-        Location jakartaHttpOnlyLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "jakarta.servlet.http.Cookie.setHttpOnly");
-        return javaxSetHttpOnlyLocation != null || jakartaHttpOnlyLocation != null;
+    private Location getSetHttpOnlyLocation(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
+        return getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setHttpOnly");
     }
 
     @Override

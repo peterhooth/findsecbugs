@@ -67,7 +67,7 @@ public class JstlOutDetector implements Detector {
         JavaClass javaClass = classContext.getJavaClass();
 
         try {
-            if(!isHttpServletSubtype(javaClass)) {
+            if(!Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet")) {
                 return;
             }
         } catch (ClassNotFoundException e) {
@@ -80,11 +80,6 @@ public class JstlOutDetector implements Detector {
             } catch (DataflowAnalysisException e) {
             }
         }
-    }
-
-    private boolean isHttpServletSubtype(JavaClass javaClass) throws ClassNotFoundException {
-        return Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet") ||
-                Hierarchy.isSubtype(javaClass.getClassName(), "jakarta.servlet.http.HttpServlet");
     }
 
     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException {

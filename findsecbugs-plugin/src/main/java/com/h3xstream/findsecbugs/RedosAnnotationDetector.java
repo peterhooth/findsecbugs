@@ -38,8 +38,7 @@ public class RedosAnnotationDetector implements Detector {
 
     private static final String REDOS_TYPE = "REDOS";
 
-    private static final String JAVAX_REGEX_ANNOTATION_TYPES = "Ljavax/validation/constraints/Pattern;";
-    private static final String JAKARTA_REGEX_ANNOTATION_TYPES = "Ljakarta/validation/constraints/Pattern;";
+    private static final String REGEX_ANNOTATION_TYPES = "Ljavax/validation/constraints/Pattern;";
 
     private BugReporter bugReporter;
 
@@ -54,7 +53,7 @@ public class RedosAnnotationDetector implements Detector {
 
             for (AnnotationEntry ae : f.getAnnotationEntries()) {
 
-                if (isRegexAnnotation(ae)) {
+                if (REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType())) {
 
                     ElementValuePair[] values = ae.getElementValuePairs();
 
@@ -82,10 +81,6 @@ public class RedosAnnotationDetector implements Detector {
                 }
             }
         }
-    }
-
-    private boolean isRegexAnnotation(AnnotationEntry ae) {
-        return JAVAX_REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType()) || JAKARTA_REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType());
     }
 
     @Override

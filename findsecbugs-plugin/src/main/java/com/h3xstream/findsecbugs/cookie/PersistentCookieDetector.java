@@ -34,7 +34,7 @@ public class PersistentCookieDetector extends OpcodeStackDetector {
     @Override
     public void sawOpcode(int seen) {
 
-        if (seen == Const.INVOKEVIRTUAL && isCookieClass()
+        if (seen == Const.INVOKEVIRTUAL && getClassConstantOperand().equals("javax/servlet/http/Cookie")
                 && getNameConstantOperand().equals("setMaxAge")) {
 
             Object maxAge = stack.getStackItem(0).getConstant();
@@ -46,9 +46,5 @@ public class PersistentCookieDetector extends OpcodeStackDetector {
                         .addClass(this).addMethod(this).addSourceLine(this));
             }
         }
-    }
-
-    private boolean isCookieClass() {
-        return getClassConstantOperand().equals("javax/servlet/http/Cookie") || getClassConstantOperand().equals("jakarta/servlet/http/Cookie");
     }
 }
